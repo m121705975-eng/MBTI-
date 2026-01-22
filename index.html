@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科学16型人格测试 | MBTI</title>
+    <style>
+        /* 基础重置与全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 自定义提示框 */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 9999; /* 提升层级避免被遮挡 */
+            display: none;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* 欢迎页样式 */
+        .welcome-page {
+            text-align: center;
+            padding: 60px 30px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .welcome-page h1 {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3498db, #673ab7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .welcome-page p {
+            font-size: 1.15rem;
+            margin-bottom: 40px;
+            color: #666;
+            line-height: 1.8;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .start-btn {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.25rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(90deg, #2980b9, #1f618d);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+
+        /* 答题页样式 */
+        .quiz-page {
+            display: none;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .progress-container {
+            margin-bottom: 35px;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #673ab7);
+            width: 0%;
+            transition: width 0.4s ease;
+            border-radius: 6px;
+        }
+
+        .question-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border: 1px solid #f5f5f5;
+        }
+
+        .question-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        /* 替换外部图标为内置样式，避免加载失败 */
+        .question-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+            border-radius: 50%;
+            padding: 4px;
+            background: #f0f7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3498db;
+            font-size: 16px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            padding: 15px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 1.05rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .option-btn:hover::after {
+            left: 100%;
+        }
+
+        .option-btn:hover {
+            border-color: #3498db;
+            background-color: #f8fbff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+        }
+
+        .option-btn.selected {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-color: #3498db;
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.2);
+        }
+
+        .nav-btn {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        .prev-btn, .next-btn, .submit-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .prev-btn {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .prev-btn:disabled {
+            background-color: #f9f9f9;
+            color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .prev-btn:hover:not(:disabled) {
+            background-color: #e9e9e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .next-btn, .submit-btn {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .next-btn:hover, .submit-btn:hover {
+            background: linear-gradient(90deg, #2980b9, #1f618d);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn {
+            display: none;
+        }
+
+        /* 结果页样式 */
+        .result-page {
+            display: none;
+            background-color: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .personality-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .personality-img {
+            width: 100%;
+            max-width: 300px;
+            height: 300px; /* 固定高度避免布局跳动 */
+            margin: 0 auto 25px;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            object-fit: cover;
+            border: 4px solid #fff;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4eaf5 100%); /* 兜底背景 */
+        }
+
+        .personality-title {
+            text-align: center;
+            font-size: 2.2rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3498db, #673ab7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .personality-type {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .result-section h4 {
+            font-size: 1.25rem;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+            font-weight: 600;
+        }
+
+        .result-section p, .result-section ul {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .result-section ul {
+            padding-left: 25px;
+        }
+
+        .result-section ul li {
+            margin-bottom: 8px;
+        }
+
+        .restart-btn {
+            display: block;
+            margin: 40px auto 0;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+            font-weight: 500;
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(90deg, #27ae60, #219653);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 204, 113, 0.3);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .welcome-page h1 {
+                font-size: 2.2rem;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+
+            .question-card {
+                padding: 25px 20px;
+            }
+
+            .personality-title {
+                font-size: 1.8rem;
+            }
+
+            .quiz-page, .result-page {
+                padding: 20px;
+            }
+
+            .result-section {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-page {
+                padding: 40px 20px;
+            }
+            
+            .welcome-page h1 {
+                font-size: 1.8rem;
+            }
+            
+            .question-card h3 {
+                font-size: 1.2rem;
+            }
+            
+            .option-btn {
+                padding: 12px 8px;
+                font-size: 1rem;
+            }
+            
+            .prev-btn, .next-btn, .submit-btn {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+            }
+            
+            .result-page {
+                padding: 20px 15px;
+            }
+            
+            .personality-img {
+                height: 200px;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 自定义提示框 -->
+        <div class="custom-alert" id="customAlert"></div>
+
+        <!-- 欢迎页 -->
+        <div class="welcome-page" id="welcomePage">
+            <h1>16型人格科学测试</h1>
+            <p>32道精简题目，带你了解真实的自己<br>测试结果包含性格画像、优劣势分析、职业建议</p>
+            <button class="start-btn" id="startBtn">开始测试</button>
+        </div>
+
+        <!-- 答题页 -->
+        <div class="quiz-page" id="quizPage">
+            <div class="progress-container">
+                <div class="progress-text">
+                    <span id="currentQuestionNum">第1题</span>
+                    <span>共32题</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <div class="question-card" id="questionCard">
+                <h3 id="questionTitle"></h3>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+            
+            <div class="nav-btn">
+                <button class="prev-btn" id="prevBtn">上一题</button>
+                <div>
+                    <button class="next-btn" id="nextBtn">下一题</button>
+                    <button class="submit-btn" id="submitBtn">提交测试</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果页 -->
+        <div class="result-page" id="resultPage">
+            <div class="personality-header">
+                <div class="personality-img" id="personalityImg"></div> <!-- 改为div避免图片加载问题 -->
+                <h2 class="personality-title" id="personalityName"></h2>
+                <div class="personality-type" id="personalityType"></div>
+            </div>
+            
+            <div class="result-section">
+                <h4>核心特点</h4>
+                <p id="personalityTraits"></p>
+            </div>
+
+            <div class="result-section">
+                <h4>优势与劣势</h4>
+                <p><strong>优势：</strong><span id="strengths"></span></p>
+                <p style="margin-top: 10px;"><strong>劣势：</strong><span id="weaknesses"></span></p>
+            </div>
+
+            <div class="result-section">
+                <h4>适配职业方向</h4>
+                <ul id="careerDirections"></ul>
+            </div>
+
+            <div class="result-section">
+                <h4>发展建议</h4>
+                <p id="suggestions"></p>
+            </div>
+
+            <button class="restart-btn" id="restartBtn">重新测试</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. 测试题库（32题，覆盖E/I、S/N、T/F、J/P四个维度，每个维度8题）
+        const quizQuestions = [
+            // E/I维度（外向/内向）- 1-8题
+            {
+                id: 1,
+                text: "参加社交活动后，我通常感觉：",
+                iconChar: "🌐", // 用字符替代外部图标
+                options: [
+                    { text: "精力充沛，充满活力", score: { E: 1, I: 0 } },
+                    { text: "需要独处恢复精力", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 2,
+                text: "我更倾向于：",
+                iconChar: "🗣️",
+                options: [
+                    { text: "主动发起对话和社交", score: { E: 1, I: 0 } },
+                    { text: "等待他人先主动交流", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 3,
+                text: "遇到烦恼时，我更愿意：",
+                iconChar: "💭",
+                options: [
+                    { text: "和朋友倾诉", score: { E: 1, I: 0 } },
+                    { text: "自己安静思考", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 4,
+                text: "我更喜欢的工作方式：",
+                iconChar: "👥",
+                options: [
+                    { text: "团队协作，多人讨论", score: { E: 1, I: 0 } },
+                    { text: "独立完成，少被打扰", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 5,
+                text: "在聚会中，我通常是：",
+                iconChar: "🎉",
+                options: [
+                    { text: "活跃的中心人物", score: { E: 1, I: 0 } },
+                    { text: "安静的观察者", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 6,
+                text: "我获取能量的方式是：",
+                iconChar: "⚡",
+                options: [
+                    { text: "和他人互动", score: { E: 1, I: 0 } },
+                    { text: "独自思考或做事", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 7,
+                text: "面对新认识的人，我会：",
+                iconChar: "👤",
+                options: [
+                    { text: "轻松自然地交流", score: { E: 1, I: 0 } },
+                    { text: "有点紧张，需要适应", score: { E: 0, I: 1 } }
+                ]
+            },
+            {
+                id: 8,
+                text: "空闲时间我更愿意：",
+                iconChar: "🕒",
+                options: [
+                    { text: "和朋友出去玩", score: { E: 1, I: 0 } },
+                    { text: "在家看书/追剧/独处", score: { E: 0, I: 1 } }
+                ]
+            },
+
+            // S/N维度（实感/直觉）- 9-16题
+            {
+                id: 9,
+                text: "我做决策时更依赖：",
+                iconChar: "🧠",
+                options: [
+                    { text: "具体的事实和经验", score: { S: 1, N: 0 } },
+                    { text: "直觉和未来的可能性", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 10,
+                text: "我对以下哪类信息更感兴趣：",
+                iconChar: "📚",
+                options: [
+                    { text: "具体的细节和数据", score: { S: 1, N: 0 } },
+                    { text: "抽象的概念和想法", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 11,
+                text: "我看待未来的方式：",
+                iconChar: "🔮",
+                options: [
+                    { text: "基于现有情况稳步规划", score: { S: 1, N: 0 } },
+                    { text: "畅想多种可能性和愿景", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 12,
+                text: "学习新技能时，我更关注：",
+                iconChar: "🎓",
+                options: [
+                    { text: "一步一步的实操方法", score: { S: 1, N: 0 } },
+                    { text: "整体的逻辑和应用场景", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 13,
+                text: "我更擅长：",
+                iconChar: "✨",
+                options: [
+                    { text: "记住具体的事实和细节", score: { S: 1, N: 0 } },
+                    { text: "发现事物间的关联和规律", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 14,
+                text: "我对“改变”的态度：",
+                iconChar: "🔄",
+                options: [
+                    { text: "谨慎，先看实际效果", score: { S: 1, N: 0 } },
+                    { text: "开放，愿意尝试新事物", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 15,
+                text: "我描述事情时会：",
+                iconChar: "🗨️",
+                options: [
+                    { text: "注重具体的细节和过程", score: { S: 1, N: 0 } },
+                    { text: "强调核心和整体的意义", score: { S: 0, N: 1 } }
+                ]
+            },
+            {
+                id: 16,
+                text: "我更关注：",
+                iconChar: "⏳",
+                options: [
+                    { text: "当下正在发生的事", score: { S: 1, N: 0 } },
+                    { text: "未来可能发生的事", score: { S: 0, N: 1 } }
+                ]
+            },
+
+            // T/F维度（思考/情感）- 17-24题
+            {
+                id: 17,
+                text: "做决定时，我更看重：",
+                iconChar: "⚖️",
+                options: [
+                    { text: "逻辑和客观事实", score: { T: 1, F: 0 } },
+                    { text: "他人的感受和需求", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 18,
+                text: "面对批评，我会：",
+                iconChar: "📝",
+                options: [
+                    { text: "先分析合理性，再接受", score: { T: 1, F: 0 } },
+                    { text: "先在意感受，再慢慢消化", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 19,
+                text: "团队合作中，我更关注：",
+                iconChar: "🤝",
+                options: [
+                    { text: "目标是否高效达成", score: { T: 1, F: 0 } },
+                    { text: "团队氛围是否和谐", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 20,
+                text: "我解决问题时：",
+                iconChar: "🔧",
+                options: [
+                    { text: "优先考虑理性分析", score: { T: 1, F: 0 } },
+                    { text: "优先考虑人情因素", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 21,
+                text: "我更容易被什么打动：",
+                iconChar: "❤️",
+                options: [
+                    { text: "公正和公平的原则", score: { T: 1, F: 0 } },
+                    { text: "温暖和共情的瞬间", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 22,
+                text: "我评价他人时会：",
+                iconChar: "🌟",
+                options: [
+                    { text: "客观指出优缺点", score: { T: 1, F: 0 } },
+                    { text: "先肯定，再委婉提建议", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 23,
+                text: "我处理冲突时：",
+                iconChar: "🛡️",
+                options: [
+                    { text: "直接解决问题，不回避", score: { T: 1, F: 0 } },
+                    { text: "先缓和情绪，再谈问题", score: { T: 0, F: 1 } }
+                ]
+            },
+            {
+                id: 24,
+                text: "我认为“公平”是：",
+                iconChar: "🎯",
+                options: [
+                    { text: "对所有人一视同仁", score: { T: 1, F: 0 } },
+                    { text: "根据每个人的情况调整", score: { T: 0, F: 1 } }
+                ]
+            },
+
+            // J/P维度（判断/感知）- 25-32题
+            {
+                id: 25,
+                text: "我对生活的偏好：",
+                iconChar: "📅",
+                options: [
+                    { text: "有计划、有规律", score: { J: 1, P: 0 } },
+                    { text: "灵活、随性", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 26,
+                text: "面对截止日期，我会：",
+                iconChar: "⏰",
+                options: [
+                    { text: "提前完成，留缓冲时间", score: { J: 1, P: 0 } },
+                    { text: "临近截止才高效完成", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 27,
+                text: "我整理物品的习惯：",
+                iconChar: "🧹",
+                options: [
+                    { text: "分类整理，保持整洁", score: { J: 1, P: 0 } },
+                    { text: "随性摆放，能用就行", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 28,
+                text: "我做计划的方式：",
+                iconChar: "📋",
+                options: [
+                    { text: "详细规划，尽量按计划来", score: { J: 1, P: 0 } },
+                    { text: "只定大致方向，随机应变", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 29,
+                text: "我对意外的态度：",
+                iconChar: "🌪️",
+                options: [
+                    { text: "感到烦躁，想尽快回到计划", score: { J: 1, P: 0 } },
+                    { text: "觉得新鲜，愿意调整适应", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 30,
+                text: "我结束一件事的倾向：",
+                iconChar: "🏁",
+                options: [
+                    { text: "尽快收尾，有明确结果", score: { J: 1, P: 0 } },
+                    { text: "不急于结束，保留可能性", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 31,
+                text: "我出门前会：",
+                iconChar: "🚪",
+                options: [
+                    { text: "提前准备好所有东西", score: { J: 1, P: 0 } },
+                    { text: "临时收拾，差不多就走", score: { J: 0, P: 1 } }
+                ]
+            },
+            {
+                id: 32,
+                text: "我工作/学习的节奏：",
+                iconChar: "⚙️",
+                options: [
+                    { text: "按部就班，完成一项再做下一项", score: { J: 1, P: 0 } },
+                    { text: "同时推进多项，灵活切换", score: { J: 0, P: 1 } }
+                ]
+            }
+        ];
+
+        // 2. 16人格数据（包含画像、特点、优劣势、职业、建议）
+        const personalityData = {
+            "ESTJ": {
+                name: "总经理型",
+                icon: "👔",
+                traits: "ESTJ是具有外向、观察、思考和判断人格特征的人。他们有很强的毅力，遵循自己的明智判断。他们通常充当稳定力量，能够在逆境中提供坚实的方向。",
+                strengths: "务实、果断、有责任心、组织能力强、信守承诺、注重效率",
+                weaknesses: "固执、缺乏耐心、不擅长变通、忽视他人感受、过于直接",
+                careers: ["企业管理者", "项目经理", "警察/军人", "财务主管", "人力资源总监"],
+                suggestions: "学会倾听他人的不同意见，适当放松对规则的坚持，关注团队成员的情感需求，避免过于强势的沟通方式。"
+            },
+            "ESTP": {
+                name: "企业家型",
+                icon: "💼",
+                traits: "ESTP是具有外向、观察、思考和感知人格特征的人。他们精力充沛，大胆果断。他们非常了解自己周围的环境，是敏锐的实践者，善于利用时机。",
+                strengths: "适应力强、行动力强、务实、乐观、善于社交、临场反应快",
+                weaknesses: "缺乏耐心、冲动、不愿做长远规划、容易厌倦、忽视细节",
+                careers: ["销售经理", "公关专员", "创业家", "导游", "运动员/教练"],
+                suggestions: "培养长期规划的能力，做事前多思考后果，注重细节和流程，避免凭一时冲动做决定。"
+            },
+            "ESFJ": {
+                name: "执政官型",
+                icon: "👑",
+                traits: "ESFJ是具有外向、观察、感觉和判断人格特征的人。他们非常关心他人的需求，并且热情地想要提供帮助。他们通常很受欢迎，善于交际，能很好地理解他人。",
+                strengths: "热情、有同理心、善于沟通、乐于助人、有责任心、团队意识强",
+                weaknesses: "过于在意他人评价、缺乏主见、容易过度付出、不愿冲突、循规蹈矩",
+                careers: ["教师", "心理咨询师", "客服主管", "活动策划", "医护人员"],
+                suggestions: "学会拒绝不合理的要求，建立自我边界，培养独立判断的能力，不要过分依赖他人的认可。"
+            },
+            "ESFP": {
+                name: "表演者型",
+                icon: "🎭",
+                traits: "ESFP是具有外向、观察、感觉和感知人格特征的人。他们充满热情，热爱生活，喜欢与人交往。他们是天生的艺人，善于在人群中创造轻松愉快的氛围。",
+                strengths: "乐观、开朗、有感染力、适应力强、善于表达、享受当下",
+                weaknesses: "缺乏长远规划、容易分心、情绪化、不愿面对负面情绪、浅尝辄止",
+                careers: ["演员/主持人", "旅游博主", "美妆顾问", "健身教练", "餐饮管理"],
+                suggestions: "培养专注力和耐心，为自己设定长期目标，学会理性分析问题，不要逃避困难。"
+            },
+            "ENTJ": {
+                name: "指挥官型",
+                icon: "🫡",
+                traits: "ENTJ是具有外向、直觉、思考和判断人格特征的人。他们是大胆的领导者，富有想象力的战略家。他们乐于制定和执行复杂的计划，以实现他们的大胆愿景。",
+                strengths: "领导力强、有远见、果断、逻辑清晰、目标导向、善于规划",
+                weaknesses: "过于强势、缺乏耐心、忽视他人感受、固执、不擅长倾听",
+                careers: ["CEO/高管", "战略顾问", "律师", "工程师", "军事指挥官"],
+                suggestions: "学会尊重他人的想法，放慢节奏倾听团队意见，关注执行过程中的人文关怀，避免过于独断。"
+            },
+            "ENTP": {
+                name: "辩论家型",
+                icon: "🗣️",
+                traits: "ENTP是具有外向、直觉、思考和感知人格特征的人。他们聪明、机智、思维敏捷，喜欢挑战和辩论。他们是天生的问题解决者，善于发现新的可能性。",
+                strengths: "思维敏捷、创造力强、善于创新、适应力强、口才好、好奇心强",
+                weaknesses: "缺乏耐心、容易分心、不愿落实细节、爱抬杠、虎头蛇尾",
+                careers: ["创意总监", "营销策划", "律师", "创业家", "脱口秀演员"],
+                suggestions: "培养执行力和专注力，将创意落地为实际成果，学会尊重他人的观点，避免过度争论。"
+            },
+            "ENFJ": {
+                name: "教育家型",
+                icon: "📖",
+                traits: "ENFJ是具有外向、直觉、感觉和判断人格特征的人。他们富有魅力，热情且负责。他们善于理解他人，并且有很强的说服力，致力于帮助他人成长。",
+                strengths: "有同理心、领导力强、善于沟通、有感染力、理想主义、乐于助人",
+                weaknesses: "过于理想化、容易过度付出、不愿批评他人、情绪化、缺乏边界",
+                careers: ["教师/培训师", "心理咨询师", "公益组织者", "人力资源经理", "演讲家"],
+                suggestions: "建立自我保护的边界，学会理性看待问题，接受不完美的现实，不要过分承担他人的责任。"
+            },
+            "ENFP": {
+                name: "竞选者型",
+                icon: "🗳️",
+                traits: "ENFP是具有外向、直觉、感觉和感知人格特征的人。他们热情奔放，富有创造力，善于发现他人的潜能。他们是理想主义者，总是充满新的想法和可能性。",
+                strengths: "创造力强、乐观、有同理心、善于沟通、适应力强、充满活力",
+                weaknesses: "缺乏耐心、容易分心、不愿面对现实、情绪化、虎头蛇尾",
+                careers: ["设计师", "文案策划", "创业家", "社工", "自由职业者"],
+                suggestions: "培养执行力和专注力，将想法落地，学会面对和解决实际问题，不要逃避困难。"
+            },
+            "ISTJ": {
+                name: "物流师型",
+                icon: "📦",
+                traits: "ISTJ是具有内向、观察、思考和判断人格特征的人。他们认真负责，注重事实和细节，是可靠的执行者。他们坚守承诺，致力于维护秩序和稳定。",
+                strengths: "严谨、可靠、有责任心、注重细节、执行力强、信守承诺",
+                weaknesses: "固执、缺乏变通、不擅长表达情感、过于保守、害怕改变",
+                careers: ["会计/出纳", "档案管理员", "工程师", "质量检测员", "行政专员"],
+                suggestions: "学会接受变化和新事物，适当表达自己的情感，培养创新思维，不要过分拘泥于规则。"
+            },
+            "ISTP": {
+                name: "手艺人型",
+                icon: "🛠️",
+                traits: "ISTP是具有内向、观察、思考和感知人格特征的人。他们冷静、务实，善于分析和解决实际问题。他们是天生的动手派，喜欢拆解和重建事物。",
+                strengths: "动手能力强、理性、适应力强、务实、善于解决实际问题、冷静",
+                weaknesses: "缺乏耐心、不愿做长远规划、不擅长表达情感、容易厌倦、忽视他人感受",
+                careers: ["工程师", "机械维修师", "程序员", "侦探", "运动员"],
+                suggestions: "培养长期规划的能力，学会表达自己的想法和感受，关注人际关系，避免过于独来独往。"
+            },
+            "ISFJ": {
+                name: "守卫者型",
+                icon: "🛡️",
+                traits: "ISFJ是具有内向、观察、感觉和判断人格特征的人。他们非常关心他人的需求，乐于助人，是可靠的守护者。他们注重传统和责任，善于照顾他人。",
+                strengths: "有同理心、细心、有责任心、乐于助人、可靠、善于照顾他人",
+                weaknesses: "过于在意他人感受、缺乏主见、容易过度付出、不愿拒绝、循规蹈矩",
+                careers: ["护士/护工", "教师", "行政助理", "社工", "客服专员"],
+                suggestions: "学会拒绝不合理的要求，建立自我边界，培养独立思考的能力，不要过分压抑自己的需求。"
+            },
+            "ISFP": {
+                name: "艺术家型",
+                icon: "🎨",
+                traits: "ISFP是具有内向、观察、感觉和感知人格特征的人。他们温柔、敏感，善于通过艺术和行动表达自己。他们热爱生活，注重当下的体验。",
+                strengths: "有创造力、温柔、有同理心、热爱生活、适应力强、注重细节",
+                weaknesses: "情绪化、缺乏自信、不愿冲突、容易逃避问题、缺乏长远规划",
+                careers: ["设计师", "摄影师", "厨师", "花艺师", "宠物美容师"],
+                suggestions: "培养自信心和决策能力，学会面对冲突和问题，为自己设定长期目标，不要过分在意他人评价。"
+            },
+            "INTJ": {
+                name: "建筑师型",
+                icon: "🏗️",
+                traits: "INTJ是具有内向、直觉、思考和判断人格特征的人。他们富有想象力和战略思维，是天生的规划者。他们对自己的能力充满信心，追求完美和效率。",
+                strengths: "有远见、逻辑清晰、善于规划、独立思考、创造力强、目标导向",
+                weaknesses: "过于理性、缺乏同理心、固执、不擅长沟通、对自己和他人要求过高",
+                careers: ["科学家", "程序员", "设计师", "战略顾问", "企业家"],
+                suggestions: "学会关注他人的情感需求，适当放松对完美的追求，倾听他人的意见，避免过于独断。"
+            },
+            "INTP": {
+                name: "逻辑学家型",
+                icon: "🧬",
+                traits: "INTP是具有内向、直觉、思考和感知人格特征的人。他们善于分析和思考复杂的问题，是天生的逻辑学家。他们好奇心强，追求真理和知识。",
+                strengths: "逻辑思维强、好奇心强、善于分析、创造力强、独立思考、追求真理",
+                weaknesses: "缺乏行动力、不擅长沟通、容易分心、忽视现实、不愿面对琐碎事务",
+                careers: ["程序员", "科学家", "哲学家", "设计师", "学术研究员"],
+                suggestions: "培养执行力和专注力，学会表达自己的想法，关注实际应用，不要过分沉浸在理论世界。"
+            },
+            "INFJ": {
+                name: "咨询师型",
+                icon: "🩺",
+                traits: "INFJ是具有内向、直觉、感觉和判断人格特征的人。他们富有洞察力和同理心，善于理解他人的内心世界。他们是理想主义者，致力于帮助他人成长。",
+                strengths: "有洞察力、同理心强、善于思考、理想主义、有创造力、善于倾听",
+                weaknesses: "过于理想化、情绪化、容易过度思考、不愿面对冲突、缺乏自信",
+                careers: ["心理咨询师", "作家", "教师", "公益组织者", "设计师"],
+                suggestions: "学会接受现实的不完美，避免过度思考，建立自信心，学会表达自己的需求和想法。"
+            },
+            "INFP": {
+                name: "调停者型",
+                icon: "🕊️",
+                traits: "INFP是具有内向、直觉、感觉和感知人格特征的人。他们富有理想主义和创造力，善于思考人生的意义。他们温柔、敏感，致力于实现自己的价值观。",
+                strengths: "有创造力、理想主义、同理心强、善于思考、温柔、有主见",
+                weaknesses: "情绪化、缺乏行动力、容易逃避现实、过于敏感、不愿冲突",
+                careers: ["作家/诗人", "设计师", "心理咨询师", "社工", "自由职业者"],
+                suggestions: "培养执行力和行动力，学会面对现实和问题，适当放宽对自己的要求，不要过分敏感。"
+            }
+        };
+
+        // 3. 页面元素获取
+        const welcomePage = document.getElementById("welcomePage");
+        const quizPage = document.getElementById("quizPage");
+        const resultPage = document.getElementById("resultPage");
+        const startBtn = document.getElementById("startBtn");
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        const submitBtn = document.getElementById("submitBtn");
+        const restartBtn = document.getElementById("restartBtn");
+        const progressFill = document.getElementById("progressFill");
+        const currentQuestionNum = document.getElementById("currentQuestionNum");
+        const questionTitle = document.getElementById("questionTitle");
+        const optionsContainer = document.getElementById("optionsContainer");
+        const personalityName = document.getElementById("personalityName");
+        const personalityType = document.getElementById("personalityType");
+        const personalityImg = document.getElementById("personalityImg");
+        const personalityTraits = document.getElementById("personalityTraits");
+        const strengths = document.getElementById("strengths");
+        const weaknesses = document.getElementById("weaknesses");
+        const careerDirections = document.getElementById("careerDirections");
+        const suggestions = document.getElementById("suggestions");
+        const customAlert = document.getElementById("customAlert");
+
+        // 4. 全局变量
+        let currentQuestionIndex = 0; // 当前题目索引
+        let userAnswers = {}; // 用户答案存储
+        let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 }; // 维度得分
+
+        // 5. 工具函数
+        // 显示自定义提示框
+        function showAlert(message, duration = 2000) {
+            customAlert.textContent = message;
+            customAlert.style.display = "block";
+            
+            setTimeout(() => {
+                customAlert.style.display = "none";
+            }, duration);
+        }
+
+        // 重置当前题目的得分（解决重复累加问题）
+        function resetQuestionScore(questionId) {
+            const question = quizQuestions.find(q => q.id === questionId);
+            if (!question || !userAnswers[questionId]) return;
+            
+            const selectedOption = question.options[userAnswers[questionId]];
+            const score = selectedOption.score;
+            for (const key in score) {
+                scores[key] -= score[key];
+            }
+        }
+
+        // 6. 初始化题目
+        function initQuestion(index) {
+            const question = quizQuestions[index];
+            
+            // 更新题目序号显示
+            currentQuestionNum.textContent = `第${question.id}题`;
+            
+            // 设置题目标题（用字符图标替代外部图片）
+            questionTitle.innerHTML = `<span class="question-icon">${question.iconChar}</span> ${question.id}. ${question.text}`;
+            
+            // 清空选项容器
+            optionsContainer.innerHTML = "";
+            
+            // 生成选项按钮
+            question.options.forEach((option, optIndex) => {
+                const optionBtn = document.createElement("button");
+                optionBtn.className = "option-btn";
+                
+                // 如果用户之前选过这个选项，保持选中状态
+                if (userAnswers[question.id] === optIndex) {
+                    optionBtn.classList.add("selected");
+                }
+                
+                optionBtn.textContent = option.text;
+                optionBtn.addEventListener("click", () => {
+                    // 如果之前选过其他选项，先重置得分
+                    if (userAnswers[question.id] !== undefined && userAnswers[question.id] !== optIndex) {
+                        resetQuestionScore(question.id);
+                    }
+                    
+                    // 移除其他选项的选中状态
+                    document.querySelectorAll(".option-btn").forEach(btn => {
+                        btn.classList.remove("selected");
+                    });
+                    
+                    // 添加当前选项的选中状态
+                    optionBtn.classList.add("selected");
+                    
+                    // 存储用户答案
+                    userAnswers[question.id] = optIndex;
+                    
+                    // 累加得分
+                    const score = option.score;
+                    for (const key in score) {
+                        scores[key] += score[key];
+                    }
+                });
+                
+                optionsContainer.appendChild(optionBtn);
+            });
+            
+            // 更新进度条
+            const progressPercent = ((index + 1) / quizQuestions.length) * 100;
+            progressFill.style.width = `${progressPercent}%`;
+            
+            // 控制上一题按钮状态
+            prevBtn.disabled = index === 0;
+            
+            // 控制下一题/提交按钮显示
+            if (index === quizQuestions.length - 1) {
+                nextBtn.style.display = "none";
+                submitBtn.style.display = "inline-block";
+            } else {
+                nextBtn.style.display = "inline-block";
+                submitBtn.style.display = "none";
+            }
+        }
+
+        // 7. 计算人格类型
+        function calculatePersonality() {
+            const EorI = scores.E >= scores.I ? "E" : "I";
+            const SorN = scores.S >= scores.N ? "S" : "N";
+            const TorF = scores.T >= scores.F ? "T" : "F";
+            const JorP = scores.J >= scores.P ? "J" : "P";
+            return EorI + SorN + TorF + JorP;
+        }
+
+        // 8. 展示结果
+        function showResult() {
+            const personalityTypeCode = calculatePersonality();
+            const data = personalityData[personalityTypeCode];
+            
+            // 填充结果数据
+            personalityName.textContent = data.name;
+            personalityType.textContent = `MBTI ${personalityTypeCode}`;
+            personalityImg.textContent = data.icon; // 显示人格图标
+            personalityImg.style.fontSize = "60px"; // 调整图标大小
+            personalityTraits.textContent = data.traits;
+            strengths.textContent = data.strengths;
+            weaknesses.textContent = data.weaknesses;
+            
+            // 填充职业方向
+            careerDirections.innerHTML = "";
+            data.careers.forEach(career => {
+                const li = document.createElement("li");
+                li.textContent = career;
+                careerDirections.appendChild(li);
+            });
+            
+            suggestions.textContent = data.suggestions;
+            
+            // 切换页面
+            quizPage.style.display = "none";
+            resultPage.style.display = "block";
+            
+            // 平滑滚动到结果页顶部
+            resultPage.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 9. 事件监听
+        // 开始测试
+        startBtn.addEventListener("click", () => {
+            welcomePage.style.display = "none";
+            quizPage.style.display = "block";
+            initQuestion(currentQuestionIndex);
+            
+            // 平滑滚动到答题页
+            quizPage.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 上一题
+        prevBtn.addEventListener("click", () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                initQuestion(currentQuestionIndex);
+            }
+        });
+
+        // 下一题
+        nextBtn.addEventListener("click", () => {
+            // 检查是否选择了选项
+            if (!userAnswers[quizQuestions[currentQuestionIndex].id]) {
+                showAlert("请选择一个选项后继续！");
+                return;
+            }
+            
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                currentQuestionIndex++;
+                initQuestion(currentQuestionIndex);
+                
+                // 平滑滚动到题目区域
+                questionTitle.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // 提交测试
+        submitBtn.addEventListener("click", () => {
+            // 检查是否选择了最后一题选项
+            if (!userAnswers[quizQuestions[currentQuestionIndex].id]) {
+                showAlert("请选择最后一题的选项后提交！");
+                return;
+            }
+            
+            showResult();
+        });
+
+        // 重新测试
+        restartBtn.addEventListener("click", () => {
+            // 重置变量
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            
+            // 切换页面
+            resultPage.style.display = "none";
+            welcomePage.style.display = "block";
+            
+            // 平滑滚动到欢迎页
+            welcomePage.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
